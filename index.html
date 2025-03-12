@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Dados</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .setup-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .game-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .players {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .player {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin: 0 10px;
+            position: relative;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        
+        .player-score {
+            font-size: 2em;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .dice {
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .total-points {
+            font-size: 1.1em;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .history {
+            margin-top: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .winner-highlight {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .game-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .active-player {
+            border: 2px solid #3498db;
+        }
+        
+        .winner-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: gold;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Juego de Dados</h1>
+        
+        <div id="setup-section" class="setup-section">
+            <h2>Configuración del Juego</h2>
+            <div class="input-group">
+                <label for="jugador1">Nombre del Jugador 1:</label>
+                <input type="text" id="jugador1" placeholder="Jugador 1" value="Jugador 1">
+            </div>
+            <div class="input-group">
+                <label for="jugador2">Nombre del Jugador 2:</label>
+                <input type="text" id="jugador2" placeholder="Jugador 2" value="Jugador 2">
+            </div>
+            <div class="controls">
+                <button id="start-game">Comenzar Juego</button>
+            </div>
+        </div>
+        
+        <div id="game-section" class="game-section">
+            <div class="players">
+                <div id="player1" class="player">
+                    <div class="winner-badge">🏆</div>
+                    <div class="player-name" id="player1-name">Jugador 1</div>
+                    <div class="player-score" id="player1-score">0</div>
+                    <div class="dice-container">
+                        <div class="dice" id="p1-dice1">-</div>
+                        <div class="dice" id="p1-dice2">-</div>
+                    </div>
+                    <div class="total-points" id="p1-total">Total: 0</div>
+                </div>
+                
+                <div id="player2" class="player">
+                    <div class="winner-badge">🏆</div>
+                    <div class="player-name" id="player2-name">Jugador 2</div>
+                    <div class="player-score" id="player2-score">0</div>
+                    <div class="dice-container">
+                        <div class="dice" id="p2-dice1">-</div>
+                        <div class="dice" id="p2-dice2">-</div>
+                    </div>
+                    <div class="total-points" id="p2-total">Total: 0</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="roll-dice">Lanzar Dados</button>
+                <button id="new-game" disabled>Nuevo Juego</button>
+            </div>
+            
+            <div id="game-result" class="game-result"></div>
+            
+            <div class="history">
+                <h3>Historial de Jugadas</h3>
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Jugada</th>
+                            <th id="header-j1">Jugador 1</th>
+                            <th id="header-j2">Jugador 2</th>
+                            <th>Ganador</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Aquí se agregarán las filas dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Importar las clases desde el TypeScript transpilado
+        // En un entorno real, esto sería importado adecuadamente
+        
+        // Recreamos las clases aquí para demostración
+        class Dado {
+            puntos = 0;
+            
+            lanzar() {
+                this.puntos = Math.floor(Math.random() * 6) + 1;
+                return this.puntos;
+            }
+        }
+        
+        class Jugador {
+            nombre;
+            puntoGanado = 0;
+            
+            constructor(nombre) {
+                this.nombre = nombre;
+            }
+            
+            lanzaDados(dado1, dado2) {
+                dado1.lanzar();
+                dado2.lanzar();
+                return dado1.puntos + dado2.puntos;
+            }
+        }
+        
+        class Jugada {
+            iniciarJugada(jugador1, jugador2, dado1, dado2) {
+                let puntosJ1 = jugador1.lanzaDados(dado1, dado2);
+                let puntosJ2 = jugador2.lanzaDados(dado1, dado2);
+                let ganador = this.determinarGanador(jugador1, puntosJ1, jugador2, puntosJ2);
+                return { puntosJ1, puntosJ2, ganador };
+            }
+            
+            determinarGanador(j1, pJ1, j2, pJ2) {
+                if (pJ1 > pJ2) {
+                    j1.puntoGanado++;
+                    return j1.nombre;
+                } else if (pJ2 > pJ1) {
+                    j2.puntoGanado++;
+                    return j2.nombre;
+                } else {
+                    return "Empate";
+                }
+            }
+        }
+        
+        class JuegoDados {
+            jugador1;
+            jugador2;
+            marcadorJugador1 = 0;
+            marcadorJugador2 = 0;
+            dado1;
+            dado2;
+            cantidadJugadas = 0;
+            historialJugadas = [];
+            juegoTerminado = false;
+            ganador = "";
+            valorDado1Jugador1 = 0;
+            valorDado2Jugador1 = 0;
+            valorDado1Jugador2 = 0;
+            valorDado2Jugador2 = 0;
+            
+            constructor(jugador1, jugador2) {
+                this.jugador1 = new Jugador(jugador1);
+                this.jugador2 = new Jugador(jugador2);
+                this.dado1 = new Dado();
+                this.dado2 = new Dado();
+            }
+            
+            iniciarJuego() {
+                if (this.juegoTerminado) {
+                    return {
+                        puntosJ1: 0,
+                        puntosJ2: 0,
+                        ganador: this.ganador,
+                        juegoTerminado: true
+                    };
+                }
+                
+                // Guarda los valores de los dados antes de lanzar
+                const dadoTemp1 = new Dado();
+                const dadoTemp2 = new Dado();
+                
+                // Lanza dados para jugador 1
+                this.valorDado1Jugador1 = dadoTemp1.lanzar();
+                this.valorDado2Jugador1 = dadoTemp2.lanzar();
+                const puntosJ1 = this.valorDado1Jugador1 + this.valorDado2Jugador1;
+                
+                // Lanza dados para jugador 2
+                this.valorDado1Jugador2 = dadoTemp1.lanzar();
+                this.valorDado2Jugador2 = dadoTemp2.lanzar();
+                const puntosJ2 = this.valorDado1Jugador2 + this.valorDado2Jugador2;
+                
+                let ganadorJugada = "";
+                if (puntosJ1 > puntosJ2) {
+                    ganadorJugada = this.jugador1.nombre;
+                    this.jugador1.puntoGanado++;
+                } else if (puntosJ2 > puntosJ1) {
+                    ganadorJugada = this.jugador2.nombre;
+                    this.jugador2.puntoGanado++;
+                } else {
+                    ganadorJugada = "Empate";
+                }
+                
+                this.marcadorJugador1 = this.jugador1.puntoGanado;
+                this.marcadorJugador2 = this.jugador2.puntoGanado;
+                this.cantidadJugadas++;
+                
+                this.historialJugadas.push({
+                    jugada: this.cantidadJugadas,
+                    puntosJ1,
+                    puntosJ2,
+                    ganador: ganadorJugada
+                });
+                
+                // Verificar si alguien ganó el juego (5 puntos)
+                if (this.marcadorJugador1 >= 5) {
+                    this.juegoTerminado = true;
+                    this.ganador = this.jugador1.nombre;
+                } else if (this.marcadorJugador2 >= 5) {
+                    this.juegoTerminado = true;
+                    this.ganador = this.jugador2.nombre;
+                }
+                
+                return {
+                    puntosJ1,
+                    puntosJ2,
+                    ganador: ganadorJugada,
+                    juegoTerminado: this.juegoTerminado,
+                    valorDado1J1: this.valorDado1Jugador1,
+                    valorDado2J1: this.valorDado2Jugador1,
+                    valorDado1J2: this.valorDado1Jugador2,
+                    valorDado2J2: this.valorDado2Jugador2
+                };
+            }
+            
+            reiniciarJuego() {
+                this.cantidadJugadas = 0;
+                this.jugador1.puntoGanado = 0;
+                this.jugador2.puntoGanado = 0;
+                this.marcadorJugador1 = 0;
+                this.marcadorJugador2 = 0;
+                this.historialJugadas = [];
+                this.juegoTerminado = false;
+                this.ganador = "";
+            }
+        }
+        
+        // Elementos DOM
+        const setupSection = document.getElementById('setup-section');
+        const gameSection = document.getElementById('game-section');
+        const startGameBtn = document.getElementById('start-game');
+        const rollDiceBtn = document.getElementById('roll-dice');
+        const newGameBtn = document.getElementById('new-game');
+        const gameResult = document.getElementById('game-result');
+        const historyTable = document.getElementById('history-body');
+        
+        // Elementos de jugadores
+        const player1NameInput = document.getElementById('jugador1');
+        const player2NameInput = document.getElementById('jugador2');
+        const player1NameDisplay = document.getElementById('player1-name');
+        const player2NameDisplay = document.getElementById('player2-name');
+        const player1Score = document.getElementById('player1-score');
+        const player2Score = document.getElementById('player2-score');
+        const p1Dice1 = document.getElementById('p1-dice1');
+        const p1Dice2 = document.getElementById('p1-dice2');
+        const p2Dice1 = document.getElementById('p2-dice1');
+        const p2Dice2 = document.getElementById('p2-dice2');
+        const p1Total = document.getElementById('p1-total');
+        const p2Total = document.getElementById('p2-total');
+        const headerJ1 = document.getElementById('header-j1');
+        const headerJ2 = document.getElementById('header-j2');
+        
+        // Variables del juego
+        let juego;
+        
+        // Evento para iniciar el juego
+        startGameBtn.addEventListener('click', () => {
+            const nombre1 = player1NameInput.value.trim() || 'Jugador 1';
+            const nombre2 = player2NameInput.value.trim() || 'Jugador 2';
+            
+            // Actualizar nombres en la interfaz
+            player1NameDisplay.textContent = nombre1;
+            player2NameDisplay.textContent = nombre2;
+            headerJ1.textContent = nombre1;
+            headerJ2.textContent = nombre2;
+            
+            // Inicializar el juego
+            juego = new JuegoDados(nombre1, nombre2);
+            
+            // Cambiar a la sección de juego
+            setupSection.style.display = 'none';
+            gameSection.style.display = 'block';
+        });
+        
+        // Evento para lanzar los dados
+        rollDiceBtn.addEventListener('click', () => {
+            const resultado = juego.iniciarJuego();
+            
+            // Actualizar visualización de dados y puntos
+            p1Dice1.textContent = resultado.valorDado1J1;
+            p1Dice2.textContent = resultado.valorDado2J1;
+            p2Dice1.textContent = resultado.valorDado1J2;
+            p2Dice2.textContent = resultado.valorDado2J2;
+            
+            p1Total.textContent = `Total: ${resultado.puntosJ1}`;
+            p2Total.textContent = `Total: ${resultado.puntosJ2}`;
+            
+            // Actualizar marcadores
+            player1Score.textContent = juego.marcadorJugador1;
+            player2Score.textContent = juego.marcadorJugador2;
+            
+            // Agregar fila a la tabla de historial
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td>${juego.cantidadJugadas}</td>
+                <td>${resultado.puntosJ1}</td>
+                <td>${resultado.puntosJ2}</td>
+                <td>${resultado.ganador}</td>
+            `;
+            
+            // Resaltar al ganador de la jugada
+            if (resultado.ganador === juego.jugador1.nombre) {
+                fila.cells[1].classList.add('winner-highlight');
+            } else if (resultado.ganador === juego.jugador2.nombre) {
+                fila.cells[2].classList.add('winner-highlight');
+            }
+            
+            historyTable.prepend(fila);
+            
+            // Verificar si el juego ha terminado
+            if (resultado.juegoTerminado) {
+                rollDiceBtn.disabled = true;
+                newGameBtn.disabled = false;
+                gameResult.style.display = 'block';
+                gameResult.textContent = `¡${resultado.ganador} ha ganado el juego!`;
+                gameResult.style.backgroundColor = '#d4edda';
+                
+                // Mostrar trofeo al ganador
+                if (resultado.ganador === juego.jugador1.nombre) {
+                    document.querySelector('#player1 .winner-badge').style.display = 'flex';
+                } else {
+                    document.querySelector('#player2 .winner-badge').style.display = 'flex';
+                }
+            }
+        });
+        
+        // Evento para reiniciar el juego
+        newGameBtn.addEventListener('click', () => {
+            juego.reiniciarJuego();
+            
+            // Reiniciar interfaz
+            player1Score.textContent = '0';
+            player2Score.textContent = '0';
+            p1Dice1.textContent = '-';
+            p1Dice2.textContent = '-';
+            p2Dice1.textContent = '-';
+            p2Dice2.textContent = '-';
+            p1Total.textContent = 'Total: 0';
+            p2Total.textContent = 'Total: 0';
+            
+            // Limpiar historial
+            historyTable.innerHTML = '';
+            
+            // Ocultar resultado y habilitar botones
+            gameResult.style.display = 'none';
+            rollDiceBtn.disabled = false;
+            newGameBtn.disabled = true;
+            
+            // Ocultar trofeos
+            document.querySelector('#player1 .winner-badge').style.display = 'none';
+            document.querySelector('#player2 .winner-badge').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
